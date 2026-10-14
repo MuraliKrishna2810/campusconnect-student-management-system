@@ -35,15 +35,16 @@ export const db = drizzle({
 export async function assertDatabaseAvailable(): Promise<void> {
   if (!pool) {
     throw new Error(
-      "Database is not configured. Set MYSQL_URL in .env and start MySQL before logging in."
+      "Database is not configured. Set MYSQL_URL to a reachable MySQL database in the app's environment. On Vercel, add it in Project Settings > Environment Variables."
     );
   }
 
   try {
     await pool.execute("SELECT 1");
-  } catch {
+  } catch (error) {
+    console.error("[database] MySQL health check failed:", error);
     throw new Error(
-      "MySQL is unavailable. Start the database service and retry."
+      "MySQL is unreachable. Start your local MySQL service, or configure MYSQL_URL with a reachable hosted database. Do not use localhost for a Vercel deployment."
     );
   }
 }

@@ -12,7 +12,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState<string | null>(null);
+  const [seedError, setSeedError] = useState<string | null>(null);
+  const [seedSuccess, setSeedSuccess] = useState(false);
 
   useEffect(() => {
     if (!me) return;
@@ -41,16 +42,17 @@ export default function LoginPage() {
 
   async function seedDemo() {
     setSeeding(true);
-    setSeedMsg(null);
+    setSeedError(null);
+    setSeedSuccess(false);
     try {
       const res = await fetch("/api/seed", { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Seed failed");
-      setSeedMsg("Demo data loaded. You can now log in with the credentials shown below.");
+      setSeedSuccess(true);
       setEmail("admin@campus.local");
       setPassword("staff123");
     } catch (err) {
-      setSeedMsg(err instanceof Error ? err.message : "Seed failed");
+      setSeedError(err instanceof Error ? err.message : "Seed failed");
     } finally {
       setSeeding(false);
     }
@@ -105,9 +107,16 @@ export default function LoginPage() {
             >
               {seeding ? "Loading demo data…" : "Load demo data"}
             </Button>
-            {seedMsg ? (
+            {seedError ? (
               <div className="mt-3">
-                <Alert tone="green">{seedMsg}</Alert>
+                <Alert tone="red">{seedError}</Alert>
+              </div>
+            ) : null}
+            {seedSuccess ? (
+              <div className="mt-3">
+                <Alert tone="green">
+                  Demo data loaded. You can now log in with the credentials shown below.
+                </Alert>
                 <div className="mt-3 text-xs text-slate-600 space-y-1">
                   <div><strong>Staff:</strong> admin@campus.local / staff123</div>
                   <div><strong>Student:</strong> alice@campus.local / student123</div>
