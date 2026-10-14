@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { assertDatabaseAvailable, db } from "@/db";
 import {
   users,
   departments,
@@ -26,6 +26,15 @@ import { jsonOk, jsonError, handleRouteError } from "@/lib/api";
  */
 export async function POST() {
   try {
+    try {
+      await assertDatabaseAvailable();
+    } catch (error) {
+      return jsonError(
+        error instanceof Error ? error.message : "Database is unavailable.",
+        503
+      );
+    }
+
     // Idempotency: if admin exists, refuse
     const [admin] = await db
       .select()

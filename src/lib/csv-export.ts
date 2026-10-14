@@ -25,7 +25,7 @@ function escapeCsv(value: unknown, isDate = false): string {
 }
 
 async function exportTablesToCsv(): Promise<void> {
-  if (exportInProgress) return;
+  if (exportInProgress || !pool) return;
   exportInProgress = true;
 
   try {
@@ -75,6 +75,8 @@ async function exportTablesToCsv(): Promise<void> {
 }
 
 export function startCsvExportScheduler(): void {
+  if (!pool) return;
+
   const runExport = () => {
     void exportTablesToCsv().catch((error: unknown) => {
       console.error("[csv-export] Failed to refresh table exports:", error);

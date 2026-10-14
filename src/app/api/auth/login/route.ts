@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { assertDatabaseAvailable, db } from "@/db";
 import { users, students, parents, staffProfiles } from "@/db/schema";
 import { verifyPassword, signToken, getSessionCookieOptions } from "@/lib/auth";
 import { jsonOk, jsonError, handleRouteError } from "@/lib/api";
@@ -13,6 +13,16 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return jsonError("Email and password are required", 400);
     }
+
+    try {
+      await assertDatabaseAvailable();
+    } catch (error) {
+      return jsonError(
+        error instanceof Error ? error.message : "Database is unavailable.",
+        503
+      );
+    }
+
     const [user] = await db
       .select()
       .from(users)
