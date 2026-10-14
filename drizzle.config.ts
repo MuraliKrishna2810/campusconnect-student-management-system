@@ -1,9 +1,15 @@
 import { defineConfig } from "drizzle-kit";
 
+const mysqlUrl = process.env.MYSQL_URL;
+
+if (!mysqlUrl) {
+  throw new Error("MYSQL_URL environment variable is not configured");
+}
+
 export default defineConfig({
   dialect: "mysql",
   schema: "./src/db/schema.ts",
   dbCredentials: {
-    url: process.env.MYSQL_URL ?? "mysql://campusconnect:campusconnect@127.0.0.1:3306/campusconnect",
+    url: mysqlUrl,
   },
 });
