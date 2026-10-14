@@ -129,7 +129,7 @@ CSV files contain stored database values, including email addresses and password
 
 ### Prerequisites
 - **Node.js 18+**
-- **MySQL 8.0+** (local or hosted)
+- **Docker Desktop** with Docker Compose (for automatic local MySQL startup), or MySQL 8.0+ (local or hosted)
 - **npm** or **yarn**
 
 ### 1. Clone and Install
@@ -142,7 +142,7 @@ npm install
 ### 2. Configure Environment
 Copy `.env.example` to `.env` in the project root and set your MySQL connection URL:
 ```env
-MYSQL_URL=mysql://campusconnect:your-password@127.0.0.1:3306/campusconnect
+MYSQL_URL=mysql://campusconnect:campusconnect-dev@127.0.0.1:3306/campusconnect
 JWT_SECRET=your-secret-key-change-in-production
 ATTENDANCE_THRESHOLD=75
 
@@ -155,18 +155,21 @@ SMTP_PASSWORD=your-app-password
 SMTP_FROM=CampusConnect <no-reply@yourcollege.edu>
 ```
 
-### 3. Push Database Schema
-```bash
-npm run db:push
-```
-
-### 4. Seed Demo Data
-Start the dev server first:
+### 3. Start the App and Local Database
+With Docker Desktop running, this starts MySQL, waits for it to become healthy, pushes the database schema, and starts the Next.js development server:
 ```bash
 npm run dev
 ```
 
-Then visit `http://localhost:3000/login` and click **"Load demo data"**.
+To stop the local database container:
+```bash
+npm run db:stop
+```
+
+If you use an already-running local or hosted MySQL database instead, configure `MYSQL_URL`, push the schema with `npm run db:push`, and start only the web app with `npm run dev:app`.
+
+### 4. Seed Demo Data
+Visit `http://localhost:3000/login` and click **"Load demo data"**.
 
 Or use curl:
 ```bash
@@ -177,11 +180,6 @@ curl -X POST http://localhost:3000/api/seed
 - **Staff**: `admin@campus.local` / `staff123`
 - **Student**: `alice@campus.local` / `student123` (low attendance, triggers warnings)
 - **Parent**: `parent.alice@campus.local` / `parent123`
-
-### 5. Run Development Server
-```bash
-npm run dev
-```
 
 Visit `http://localhost:3000`. CSV files will be written to `data/exports/`.
 
@@ -199,6 +197,8 @@ Visit `http://localhost:3000`. CSV files will be written to `data/exports/`.
    - `ATTENDANCE_THRESHOLD` (default: 75)
    - SMTP variables (optional, for real emails)
 5. Deploy
+
+The app can build without `MYSQL_URL`; database-backed API routes require it at runtime. In Vercel, set `MYSQL_URL` to a reachable hosted MySQL database and set `JWT_SECRET` under **Project Settings → Environment Variables** for each deployment environment, then redeploy. Do not use `localhost` or the local Docker database URL in Vercel.
 
 ### Database
 Use a hosted MySQL service such as **Amazon RDS for MySQL** or **Google Cloud SQL for MySQL**.
