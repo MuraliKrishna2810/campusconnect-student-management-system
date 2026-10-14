@@ -129,7 +129,7 @@ CSV files contain stored database values, including email addresses and password
 
 ### Prerequisites
 - **Node.js 18+**
-- **Docker Desktop** with Docker Compose (for automatic local MySQL startup), or MySQL 8.0+ (local or hosted)
+- **MySQL 8.0+** (local or hosted)
 - **npm** or **yarn**
 
 ### 1. Clone and Install
@@ -155,23 +155,15 @@ SMTP_PASSWORD=your-app-password
 SMTP_FROM=CampusConnect <no-reply@yourcollege.edu>
 ```
 
-### 3. Start the App and Local Database
-With Docker Desktop running, this starts MySQL, waits for it to become healthy, pushes the database schema, and starts the Next.js development server:
+### 3. Prepare the Database and Start the App
+Start your local MySQL server (or use a hosted MySQL database), then configure `MYSQL_URL` in `.env`. Push the schema and start the Next.js development server:
 ```bash
+npm run db:push
 npm run dev
 ```
 
-To stop the local database container:
-```bash
-npm run db:stop
-```
-
-If you use an already-running local or hosted MySQL database instead, configure `MYSQL_URL`, push the schema with `npm run db:push`, and start only the web app with `npm run dev:app`.
-
 ### 4. Seed Demo Data
-Visit `http://localhost:3000/login` and click **"Load demo data"**.
-
-Or use curl:
+Seed the configured database from a terminal:
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
@@ -191,14 +183,15 @@ Visit `http://localhost:3000`. CSV files will be written to `data/exports/`.
 1. Push to GitHub
 2. Import repo in Vercel
 3. Set root directory to project root (not a subdirectory)
-4. Configure environment variables:
+4. Create a **hosted MySQL 8** database and configure these environment variables in **Vercel → Project Settings → Environment Variables** for every environment you deploy (Production, and Preview if needed):
    - `MYSQL_URL` (hosted MySQL connection string)
-   - `JWT_SECRET` (random 64-char string)
+   - `JWT_SECRET` (a strong random secret; do not use the example value)
    - `ATTENDANCE_THRESHOLD` (default: 75)
    - SMTP variables (optional, for real emails)
-5. Deploy
+5. Push the schema to the hosted database with `npm run db:push`, using that database's `MYSQL_URL` in your local shell. Never use a local `127.0.0.1`/`localhost` URL for Vercel.
+6. Deploy or redeploy in Vercel after setting the variables.
 
-The app can build without `MYSQL_URL`; database-backed API routes require it at runtime. In Vercel, set `MYSQL_URL` to a reachable hosted MySQL database and set `JWT_SECRET` under **Project Settings → Environment Variables** for each deployment environment, then redeploy. Do not use `localhost` or the local Docker database URL in Vercel.
+The app can build without `MYSQL_URL`, but sign-in and other database-backed features require it at runtime. The local `.env` file is not uploaded to Vercel. Seed demo data separately only if you want demo accounts in the hosted database.
 
 ### Database
 Use a hosted MySQL service such as **Amazon RDS for MySQL** or **Google Cloud SQL for MySQL**.

@@ -2,14 +2,12 @@
   "name": "nextjs-postgresql-template",
   "private": true,
   "scripts": {
-    "dev": "docker compose up -d --wait db && npm run db:push && next dev",
-    "dev:app": "next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "db:push": "drizzle-kit push",
-    "db:stop": "docker compose stop db"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",

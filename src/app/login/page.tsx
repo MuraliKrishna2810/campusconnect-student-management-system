@@ -11,9 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedError, setSeedError] = useState<string | null>(null);
-  const [seedSuccess, setSeedSuccess] = useState(false);
 
   useEffect(() => {
     if (!me) return;
@@ -37,24 +34,6 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setBusy(false);
-    }
-  }
-
-  async function seedDemo() {
-    setSeeding(true);
-    setSeedError(null);
-    setSeedSuccess(false);
-    try {
-      const res = await fetch("/api/seed", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Seed failed");
-      setSeedSuccess(true);
-      setEmail("admin@campus.local");
-      setPassword("staff123");
-    } catch (err) {
-      setSeedError(err instanceof Error ? err.message : "Seed failed");
-    } finally {
-      setSeeding(false);
     }
   }
 
@@ -94,37 +73,6 @@ export default function LoginPage() {
               {busy ? "Signing in…" : "Sign in"}
             </Button>
           </form>
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <p className="text-xs text-slate-500 mb-2">
-              First time here? Load demo data to explore all three portals.
-            </p>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={seedDemo}
-              disabled={seeding}
-              className="w-full"
-            >
-              {seeding ? "Loading demo data…" : "Load demo data"}
-            </Button>
-            {seedError ? (
-              <div className="mt-3">
-                <Alert tone="red">{seedError}</Alert>
-              </div>
-            ) : null}
-            {seedSuccess ? (
-              <div className="mt-3">
-                <Alert tone="green">
-                  Demo data loaded. You can now log in with the credentials shown below.
-                </Alert>
-                <div className="mt-3 text-xs text-slate-600 space-y-1">
-                  <div><strong>Staff:</strong> admin@campus.local / staff123</div>
-                  <div><strong>Student:</strong> alice@campus.local / student123</div>
-                  <div><strong>Parent:</strong> parent.alice@campus.local / parent123</div>
-                </div>
-              </div>
-            ) : null}
-          </div>
         </Card>
         <p className="text-center text-xs text-slate-400 mt-6">
           Secure authentication · Role-based access · Attendance warnings
